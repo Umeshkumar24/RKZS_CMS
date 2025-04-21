@@ -1,0 +1,23 @@
+.users-container {
+    padding: 20px;
+    background-color: #f0f0f0;
+    min-height: 100vh;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.users-table th, .users-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.users-table th {
+    background-color: #007bff;
+    color: white;
+}
