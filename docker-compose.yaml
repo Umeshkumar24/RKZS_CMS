@@ -1,0 +1,71 @@
+# Use version 3 of the Docker Compose file format
+version: '3.8'
+
+# Define the services for your application
+services:
+  # Database Service (PostgreSQL)
+  db:
+    # Use the official PostgreSQL image
+    image: postgres:13-alpine # Using a specific version and alpine for smaller size
+    # Set environment variables for PostgreSQL
+    environment:
+      POSTGRES_USER: myuser # Replace with your desired database user
+      POSTGRES_PASSWORD: mypassword # Replace with your desired database password
+      POSTGRES_DB: mydatabase # Replace with your desired database name
+    # Persist database data using a named volume
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Mount the named volume to the default data directory
+    # Optional: Map host port to container port for external access (e.g., using a GUI tool)
+    # ports:
+    #   - "5432:5432" # HostPort:ContainerPort
+    # Connect this service to the defined network
+    networks:
+      - app_network
+
+    # Backend Service (Express)
+  backend:
+    build:
+      context: ./server # Path to your Express backend directory
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    depends_on:
+      - db
+    volumes:
+      - ./server:/app            # Mount your backend code
+    working_dir: /app            # Set working directory for command
+    command: sh -c "npx drizzle-kit push && node server.js"  # Run migrations then start server
+    networks:
+      - app_network
+      
+  # Frontend Service (React)
+  frontend:
+    # Build the frontend image using the Dockerfile in the ./frontend directory
+    build:
+      context: ./client # Path to your React frontend directory
+      dockerfile: Dockerfile # Name of the Dockerfile for the frontend
+    # Map host port 80 to container port 80 (where Nginx serves the React app)
+    ports:
+      - "80:80"
+    # Ensure the frontend starts after the backend
+    depends_on:
+      - backend
+    # Connect this service to the defined network
+    networks:
+      - app_network
+
+# Define volumes for data persistence
+volumes:
+  # Volume to persist PostgreSQL data
+  postgres_data:
+
+# Define networks for services to communicate
+networks:
+  # A simple bridge network for all services
+  app_network:
+    driver: bridge

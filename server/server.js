@@ -29,14 +29,8 @@ if (!fs.existsSync(uploadDir)) {
 app.use('/uploads', express.static(uploadDir));
 
 // --- Database Connection (PostgreSQL) ---
-const pool = new Pool({
-    user: 'myuser',
-    password: 'mypassword',
-    host: 'localhost',
-    port: 5432,
-    database: 'mydatabase',
-});
-  
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+console.log("✅ Database connection pool created successfully.");
 
 // Optional: Basic check for pool connection on startup
 (async () => {
@@ -61,7 +55,6 @@ const pool = new Pool({
 
 
 // --- Nodemailer setup ---
-
 const transporter = nodemailer.createTransport({
     host: 'mail.rkzs.co.in', // Replace with your SMTP host
     port: 587, // Typically 465 for SSL or 587 for TLS

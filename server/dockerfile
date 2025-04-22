@@ -1,0 +1,31 @@
+# Use a Node.js image as the base image
+# Using an LTS version is generally recommended
+FROM node:20-alpine
+
+# Set the working directory inside the container
+WORKDIR /
+
+# Copy package.json and package-lock.json (or yarn.lock) first
+# This step is cached by Docker, speeding up builds if dependencies don't change
+COPY package*.json ./
+
+# Install dependencies
+# Use npm ci for clean installs in automated environments if you have package-lock.json
+RUN npm install
+
+# Copy the rest of the application code into the working directory
+COPY . .
+
+RUN npx drizzle-kit generate
+RUN npx drizzle-kit push
+
+# Expose the port that your Express server listens on
+# Replace 3000 with the actual port your Express app uses
+EXPOSE 3000
+
+# Define the command to run your application
+# This assumes your start script in package.json is 'npm start'
+CMD [ "npm", "start" ]
+
+# If your main server file is index.js and you don't have a start script, you could use:
+# CMD [ "node", "index.js" ]
